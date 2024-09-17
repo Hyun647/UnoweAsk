@@ -1,60 +1,50 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const WebSocket = require('ws');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const wss = new WebSocket.Server({ server });
 
 app.use(express.static('public'));
 
-const adminSockets = new Set(); // 관리자 페이지의 소켓 저장
+wss.on('connection', (ws, req) => {
+    // 클라이언트의 IP 주소를 로그로 출력합니다.
+    const ip = req.connection.remoteAddress;
+    console.log(`클라이언트 ${ip}가 연결되었습니다.`);
 
-io.on('connection', (socket) => {
-    console.log(`클라이언트 ${socket.id}가 연결되었습니다.`);
-
-    // 연결된 클라이언트의 유형에 따라 관리자와 공개 페이지를 구분합니다.
-    socket.on('identify', (type) => {
-        if (type === 'admin') {
-            adminSockets.add(socket); // 관리자 페이지 소켓 저장
-            console.log('관리자 페이지 소켓이 연결되었습니다.');
-        } else if (type === 'client') {
-            console.log('공개 페이지 소켓이 연결되었습니다.');
-        }
-    });
-
-    socket.on('message', (message) => {
+    ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
-            if (data.type === 'question') {
-                console.log(`질문 수신: ${data.text}`);
-                // 모든 관리자 페이지 클라이언트에게 질문을 전송합니다.
-                adminSockets.forEach((adminSocket) => {
-                    adminSocket.send(JSON.stringify({ type: 'question', text: data.text }));
-                });
-            } else if (data.type === 'answer') {
-                console.log(`답변 수신: ${data.text}`);
-                // 모든 공개 페이지 클라이언트에게 답변을 전송합니다.
-                io.emit('message', JSON.stringify({ type: 'answer', text: data.text }));
+            if (data.type === 'admin') {
+                console.log(`어드민 페이지에서 메시지 수신: ${data.message}`);
+            } else if (data.type === 'client') {
+                console.log(`공개 페이지에서 메시지 수신: ${data.message}`);
             } else {
                 console.log('받은 메시지: ', data);
             }
+            
+            // 받은 메시지를 모든 클라이언트에게 전송합니다.
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(data));
+                }
+            });
         } catch (error) {
             console.error('메시지 처리 중 오류 발생: ', error.message);
         }
     });
 
-    socket.on('disconnect', () => {
-        adminSockets.delete(socket); // 연결 종료 시 관리자 소켓에서 제거
-        console.log(`클라이언트 ${socket.id}와의 연결이 종료되었습니다.`);
+    ws.on('close', () => {
+        console.log(`클라이언트 ${ip}와의 연결이 종료되었습니다.`);
     });
 
-    socket.on('error', (error) => {
+    ws.on('error', (error) => {
         console.error('웹소켓 오류 발생: %s', error.message);
     });
 });
 
-const PORT = 4747;
+const PORT = 4567;
 server.listen(PORT, () => {
     console.log(`서버가 포트 ${PORT}에서 시작되었습니다.`);
 });
