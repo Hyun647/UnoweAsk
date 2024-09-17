@@ -13,7 +13,6 @@ adminWs.onopen = () => {
 adminWs.onmessage = (event) => {
     try {
         const message = JSON.parse(event.data);
-        console.log('관리자 페이지에서 받은 메시지: ', message);
         const qaContainer = document.getElementById('qa-container');
         
         if (message.type === 'question') {
@@ -33,6 +32,12 @@ adminWs.onmessage = (event) => {
             if (lastQaItem) {
                 lastQaItem.querySelector('.answer').innerHTML = `
                     <strong>답변:</strong> ${message.message}`;
+            }
+        } else if (message.type === 'questionDeleted') {
+            const questionId = message.questionId;
+            const questionElement = document.getElementById(`question-${questionId}`);
+            if (questionElement) {
+                questionElement.remove();
             }
         }
     } catch (error) {

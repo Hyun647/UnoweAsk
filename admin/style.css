@@ -1,21 +1,22 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f4f4f4;
+    background-color: #e9ecef;
 }
 
 .container {
     width: 90%;
     max-width: 800px;
-    background: #fff;
+    background: #ffffff;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #dee2e6;
 }
 
 #qa-container {
@@ -25,46 +26,50 @@ body {
 }
 
 .qa-item {
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background: #f9f9f9;
-    cursor: pointer;
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background: #f8f9fa;
     position: relative;
+    transition: background-color 0.3s, transform 0.3s;
 }
 
 .qa-item:hover {
-    background-color: #e0e0e0;
+    background-color: #e2e6ea;
+    transform: translateY(-2px);
 }
 
 .question {
     font-weight: bold;
-    color: #333;
+    color: #495057;
 }
 
 .answer {
     margin-top: 5px;
-    color: #555;
+    color: #6c757d;
 }
 
 textarea {
     width: 100%;
-    height: 100px;
+    height: 120px;
     margin-top: 10px;
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-family: 'Poppins', sans-serif;
 }
 
 button {
-    padding: 10px 15px;
+    padding: 12px 18px;
     border: none;
     background-color: #007bff;
-    color: #fff;
-    border-radius: 4px;
+    color: #ffffff;
+    border-radius: 8px;
     cursor: pointer;
     margin-top: 10px;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
@@ -76,14 +81,16 @@ button:hover {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: #ff4d4d;
-    color: #fff;
+    background-color: #dc3545;
+    color: #ffffff;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    padding: 5px 10px;
+    padding: 6px 12px;
+    font-size: 14px;
+    transition: background-color 0.3s;
 }
 
 .delete-btn:hover {
-    background-color: #cc0000;
+    background-color: #c82333;
 }

@@ -11,7 +11,6 @@ clientWs.onopen = () => {
 clientWs.onmessage = (event) => {
     try {
         const message = JSON.parse(event.data);
-        console.log('클라이언트 페이지에서 받은 메시지: ', message);
         const qaContainer = document.getElementById('qa-container');
         
         if (message.type === 'question') {
@@ -36,6 +35,12 @@ clientWs.onmessage = (event) => {
                     }
                     break;
                 }
+            }
+        } else if (message.type === 'questionDeleted') {
+            const questionId = message.questionId;
+            const questionElement = document.getElementById(`question-${questionId}`);
+            if (questionElement) {
+                questionElement.remove();
             }
         }
     } catch (error) {
