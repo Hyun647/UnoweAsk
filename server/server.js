@@ -35,9 +35,9 @@ pool.getConnection((err, connection) => {
 });
 
 // 질문 저장 함수
-function saveQuestion(message, questionId, callback) {
-    const query = 'INSERT INTO questions (message, questionId) VALUES (?, ?)';
-    pool.query(query, [message, questionId], (err, results) => {
+function saveQuestion(message, questionId, ip, callback) {
+    const query = 'INSERT INTO questions (message, questionId, ip_address) VALUES (?, ?, ?)';
+    pool.query(query, [message, questionId, ip], (err, results) => {
         if (err) {
             console.error('질문 저장 오류:', err);
             return callback(err);
@@ -99,7 +99,7 @@ wss.on('connection', (ws, req) => {
                 console.log(logMessage);
 
                 if (data.type === 'question') {
-                    saveQuestion(data.message, data.questionId, (err, results) => {
+                    saveQuestion(data.message, data.questionId, ip, (err, results) => {
                         if (err) return;
                         console.log('질문 저장 성공:', results);
                     });
