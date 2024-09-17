@@ -31,6 +31,7 @@ body {
     border-radius: 4px;
     background: #f9f9f9;
     cursor: pointer;
+    position: relative;
 }
 
 .qa-item:hover {
@@ -68,4 +69,21 @@ button {
 
 button:hover {
     background-color: #0056b3;
+}
+
+/* 삭제 버튼 스타일 추가 */
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.delete-btn:hover {
+    background-color: #cc0000;
 }

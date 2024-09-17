@@ -2,13 +2,12 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const mysql = require('mysql2');
-const cors = require('cors'); // 추가
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// MySQL 데이터베이스 연결 설정
 const pool = mysql.createPool({
     host: '110.15.29.199',
     port: 3347,
@@ -17,14 +16,12 @@ const pool = mysql.createPool({
     database: 'qa_db'
 });
 
-// CORS 설정
 app.use(cors({
-    origin: 'http://110.15.29.199:5500', // 허용할 출처
-    methods: ['GET', 'POST'],
+    origin: '*',
+    methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));
 
-// 연결 테스트
 pool.getConnection((err, connection) => {
     if (err) {
         console.error('데이터베이스 연결 오류:', err);
@@ -34,7 +31,6 @@ pool.getConnection((err, connection) => {
     connection.release();
 });
 
-// 질문 저장 함수
 function saveQuestion(message, questionId, ip, callback) {
     const query = 'INSERT INTO questions (message, questionId, ip_address) VALUES (?, ?, ?)';
     pool.query(query, [message, questionId, ip], (err, results) => {
@@ -46,7 +42,6 @@ function saveQuestion(message, questionId, ip, callback) {
     });
 }
 
-// 답변 저장 함수
 function saveAnswer(message, questionId, callback) {
     const query = 'UPDATE questions SET answer = ? WHERE questionId = ?';
     pool.query(query, [message, questionId], (err, results) => {
@@ -58,7 +53,18 @@ function saveAnswer(message, questionId, callback) {
     });
 }
 
-// 데이터베이스에서 질문 불러오기
+function deleteQuestion(questionId, callback) {
+    const query = 'DELETE FROM questions WHERE questionId = ?';
+    pool.query(query, [questionId], (err, results) => {
+        if (err) {
+            console.error('질문 삭제 오류:', err);
+            return callback(err);
+        }
+        console.log(`질문이 삭제되었습니다: ${questionId}`);
+        callback(null, results);
+    });
+}
+
 function getQuestions(callback) {
     const query = 'SELECT * FROM questions';
     pool.query(query, (err, results) => {
@@ -73,10 +79,8 @@ function getQuestions(callback) {
 app.use(express.static('public'));
 
 wss.on('connection', (ws, req) => {
-    // 클라이언트의 IP 주소를 얻고, IPv4 형식으로 변환
     let ip = req.connection.remoteAddress;
 
-    // IP가 ':ffff:'로 시작하면 제거하고 IPv4 주소만 남김
     if (ip.startsWith('::ffff:')) {
         ip = ip.split('::ffff:')[1];
     }
@@ -108,6 +112,16 @@ wss.on('connection', (ws, req) => {
                         if (err) return;
                         console.log('답변 저장 성공:', results);
                     });
+                } else if (data.type === 'deleteQuestion') {
+                    deleteQuestion(data.questionId, (err, results) => {
+                        if (err) return;
+                        console.log('질문 삭제 성공:', results);
+                        wss.clients.forEach(client => {
+                            if (client.readyState === WebSocket.OPEN) {
+                                client.send(JSON.stringify({ type: 'questionDeleted', questionId: data.questionId }));
+                            }
+                        });
+                    });
                 }
 
                 if (data.type !== 'identify') {
@@ -137,7 +151,6 @@ wss.on('connection', (ws, req) => {
     });
 });
 
-// 초기 질문 로딩
 getQuestions((err, results) => {
     if (err) return;
     console.log('초기 질문 로딩:', results);
@@ -149,6 +162,22 @@ app.get('/questions', (req, res) => {
             return res.status(500).json({ error: '질문 불러오기 오류' });
         }
         res.json(results);
+    });
+});
+
+app.delete('/questions/:id', (req, res) => {
+    const questionId = req.params.id;
+    deleteQuestion(questionId, (err, result) => {
+        if (err) {
+            res.status(500).json({ error: '질문 삭제 오류' });
+        } else {
+            res.json({ message: '질문이 삭제되었습니다.' });
+            wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: 'questionDeleted', questionId }));
+                }
+            });
+        }
     });
 });
 

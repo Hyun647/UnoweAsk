@@ -20,6 +20,7 @@ adminWs.onmessage = (event) => {
             const questionId = message.questionId; 
             qaContainer.innerHTML += `
                 <div class="qa-item" id="question-${questionId}" onclick="selectQuestion(${questionId})">
+                    <button class="delete-btn" onclick="deleteQuestion(event, ${questionId})">삭제</button>
                     <div class="question">
                         <strong>질문:</strong> ${message.message}
                     </div>
@@ -66,6 +67,27 @@ function sendResponse() {
     }
 }
 
+function deleteQuestion(event, questionId) {
+    event.stopPropagation(); // 클릭 이벤트가 부모 요소로 전파되지 않도록 방지
+
+    if (confirm('이 질문을 삭제하시겠습니까?')) {
+        fetch(`http://110.15.29.199:4567/questions/${questionId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('서버 오류: ' + response.status);
+            }
+            document.getElementById(`question-${questionId}`).remove();
+            console.log('질문이 성공적으로 삭제되었습니다.');
+        })
+        .catch(error => console.error('질문 삭제 오류:', error));
+    }
+}
+
 // 질문 데이터 불러오기
 function fetchQuestions() {
     fetch('http://110.15.29.199:4567/questions', { 
@@ -85,6 +107,7 @@ function fetchQuestions() {
         data.forEach(question => {
             qaContainer.innerHTML += `
                 <div class="qa-item" id="question-${question.questionId}" onclick="selectQuestion(${question.questionId})">
+                    <button class="delete-btn" onclick="deleteQuestion(event, ${question.questionId})">삭제</button>
                     <div class="question">
                         <strong>질문:</strong> ${question.message}
                     </div>
