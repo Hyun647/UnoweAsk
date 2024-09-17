@@ -67,7 +67,7 @@ UnoweAsk는 Q&A 기반 플랫폼으로, 사용자들이 질문을 하고 답변�
 
 1. **레포지토리 클론**
    ```bash
-   git clone https://github.com/yourusername/UnoweAsk.git
+   git clone https://github.com/hyun647/UnoweAsk.git
    ```
 
 2. **디펜던시 설치**
