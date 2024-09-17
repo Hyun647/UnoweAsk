@@ -181,7 +181,7 @@ app.delete('/questions/:id', (req, res) => {
     });
 });
 
-const PORT = 4567;
+const PORT = 3347;
 server.listen(PORT, () => {
     console.log(`서버가 포트 ${PORT}에서 시작되었습니다.`);
 });

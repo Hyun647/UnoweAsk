@@ -1,4 +1,4 @@
-const adminWs = new WebSocket('ws://110.15.29.199:4567');
+const adminWs = new WebSocket('ws://110.15.29.199:9727');
 
 let selectedQuestionId = null;
 
@@ -76,7 +76,7 @@ function deleteQuestion(event, questionId) {
     event.stopPropagation(); // 클릭 이벤트가 부모 요소로 전파되지 않도록 방지
 
     if (confirm('이 질문을 삭제하시겠습니까?')) {
-        fetch(`http://110.15.29.199:4567/questions/${questionId}`, {
+        fetch(`http://110.15.29.199:9727/questions/${questionId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -95,7 +95,7 @@ function deleteQuestion(event, questionId) {
 
 // 질문 데이터 불러오기
 function fetchQuestions() {
-    fetch('http://110.15.29.199:4567/questions', { 
+    fetch('http://110.15.29.199:9727/questions', { 
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

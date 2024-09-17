@@ -1,4 +1,4 @@
-const clientWs = new WebSocket('ws://110.15.29.199:4567');
+const clientWs = new WebSocket('ws://110.15.29.199:9727');
 
 clientWs.onopen = () => {
     console.log('클라이언트 웹소켓 서버와 연결되었습니다.');
@@ -71,7 +71,7 @@ function sendQuestion() {
 
 // 질문 데이터 불러오기
 function fetchQuestions() {
-    fetch('http://110.15.29.199:4567/questions', { 
+    fetch('http://110.15.29.199:9727/questions', { 
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
