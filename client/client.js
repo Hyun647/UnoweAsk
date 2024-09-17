@@ -3,6 +3,9 @@ const clientWs = new WebSocket('ws://110.15.29.199:4567');
 clientWs.onopen = () => {
     console.log('클라이언트 웹소켓 서버와 연결되었습니다.');
     clientWs.send(JSON.stringify({ type: 'identify', message: 'client' }));
+
+    // 페이지 로드 시 기존 질문 가져오기
+    fetchQuestions();
 };
 
 clientWs.onmessage = (event) => {
@@ -59,4 +62,35 @@ function sendQuestion() {
     } else {
         console.error('웹소켓이 열려있지 않거나 질문이 비어있습니다.');
     }
+}
+
+// 질문 데이터 불러오기
+function fetchQuestions() {
+    fetch('http://110.15.29.199:4567/questions', { 
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('서버 오류: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        const qaContainer = document.getElementById('qa-container');
+        data.forEach(question => {
+            qaContainer.innerHTML += `
+                <div class="qa-item" id="question-${question.questionId}">
+                    <div class="question">
+                        <strong>질문:</strong> ${question.message}
+                    </div>
+                    <div class="answer">
+                        ${question.answer ? `<strong>답변:</strong> ${question.answer}` : '답변 대기중'}
+                    </div>
+                </div>`;
+        });
+    })
+    .catch(error => console.error('질문 불러오기 오류:', error));
 }
