@@ -11,20 +11,28 @@ clientWs.onmessage = (event) => {
         console.log('클라이언트 페이지에서 받은 메시지: ', message);
         const qaContainer = document.getElementById('qa-container');
         
-        if (message.type === 'client-message') {
+        if (message.type === 'question') {
+            const questionId = message.id; // 고유한 ID 생성
             qaContainer.innerHTML += `
-                <div class="qa-item">
+                <div class="qa-item" id="question-${questionId}">
                     <div class="question">
                         <strong>질문:</strong> ${message.message}
                     </div>
-                </div>`;
-        } else if (message.type === 'admin-message') {
-            const lastQaItem = qaContainer.querySelector('.qa-item:last-child');
-            if (lastQaItem) {
-                lastQaItem.innerHTML += `
                     <div class="answer">
-                        <strong>답변:</strong> ${message.message}
-                    </div>`;
+                        답변 대기중
+                    </div>
+                </div>`;
+        } else if (message.type === 'answer') {
+            const qaItems = qaContainer.getElementsByClassName('qa-item');
+            for (let i = 0; i < qaItems.length; i++) {
+                const item = qaItems[i];
+                if (item.id === `question-${message.questionId}`) {
+                    const answerDiv = item.querySelector('.answer');
+                    if (answerDiv) {
+                        answerDiv.innerHTML = `<strong>답변:</strong> ${message.message}`;
+                    }
+                    break;
+                }
             }
         }
     } catch (error) {
@@ -44,7 +52,8 @@ function sendQuestion() {
     const questionInput = document.getElementById('questionInput');
     const question = questionInput.value;
     if (clientWs.readyState === WebSocket.OPEN && question) {
-        clientWs.send(JSON.stringify({ type: 'client-message', message: question }));
+        const questionId = Date.now(); // 질문 ID 생성
+        clientWs.send(JSON.stringify({ type: 'question', message: question, id: questionId }));
         console.log('클라이언트 페이지에서 서버로 질문을 보냈습니다: ', question);
         questionInput.value = '';
     } else {

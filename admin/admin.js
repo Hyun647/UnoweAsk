@@ -13,21 +13,22 @@ adminWs.onmessage = (event) => {
         console.log('관리자 페이지에서 받은 메시지: ', message);
         const qaContainer = document.getElementById('qa-container');
         
-        if (message.type === 'client-message') {
-            const questionId = Date.now(); // 고유한 ID 생성 (예: 현재 시간)
+        if (message.type === 'question') {
+            const questionId = message.id; 
             qaContainer.innerHTML += `
                 <div class="qa-item" id="question-${questionId}" onclick="selectQuestion(${questionId})">
                     <div class="question">
                         <strong>질문:</strong> ${message.message}
                     </div>
+                    <div class="answer">
+                        답변 대기중
+                    </div>
                 </div>`;
-        } else if (message.type === 'admin-message') {
+        } else if (message.type === 'answer') {
             const lastQaItem = qaContainer.querySelector(`#question-${message.questionId}`);
             if (lastQaItem) {
-                lastQaItem.innerHTML += `
-                    <div class="answer">
-                        <strong>답변:</strong> ${message.message}
-                    </div>`;
+                lastQaItem.querySelector('.answer').innerHTML = `
+                    <strong>답변:</strong> ${message.message}`;
             }
         }
     } catch (error) {
@@ -52,7 +53,7 @@ function sendResponse() {
     const responseInput = document.getElementById('responseInput');
     const response = responseInput.value;
     if (adminWs.readyState === WebSocket.OPEN && response && selectedQuestionId !== null) {
-        adminWs.send(JSON.stringify({ type: 'admin-message', message: response, questionId: selectedQuestionId }));
+        adminWs.send(JSON.stringify({ type: 'answer', message: response, questionId: selectedQuestionId }));
         console.log('관리자 페이지에서 서버로 답변을 보냈습니다: ', response);
         responseInput.value = '';
         document.getElementById('response-section').style.display = 'none';
