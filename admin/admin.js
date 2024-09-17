@@ -14,7 +14,7 @@ adminWs.onmessage = (event) => {
         const qaContainer = document.getElementById('qa-container');
         
         if (message.type === 'question') {
-            const questionId = message.id; 
+            const questionId = message.questionId; 
             qaContainer.innerHTML += `
                 <div class="qa-item" id="question-${questionId}" onclick="selectQuestion(${questionId})">
                     <div class="question">

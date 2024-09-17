@@ -12,7 +12,7 @@ clientWs.onmessage = (event) => {
         const qaContainer = document.getElementById('qa-container');
         
         if (message.type === 'question') {
-            const questionId = message.id; // 고유한 ID 생성
+            const questionId = message.questionId; // 고유한 ID 생성
             qaContainer.innerHTML += `
                 <div class="qa-item" id="question-${questionId}">
                     <div class="question">
@@ -53,7 +53,7 @@ function sendQuestion() {
     const question = questionInput.value;
     if (clientWs.readyState === WebSocket.OPEN && question) {
         const questionId = Date.now(); // 질문 ID 생성
-        clientWs.send(JSON.stringify({ type: 'question', message: question, id: questionId }));
+        clientWs.send(JSON.stringify({ type: 'question', message: question, questionId: questionId }));
         console.log('클라이언트 페이지에서 서버로 질문을 보냈습니다: ', question);
         questionInput.value = '';
     } else {
