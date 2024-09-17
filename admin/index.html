@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어드민 대시보드</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>UnoweAsk 어드민 대시보드</h1>
+        <p>여기에서 질문과 답변을 관리하세요.</p>
+        <div id="messages"></div>
+        <textarea id="responseInput" placeholder="여기에 답변을 입력하세요..."></textarea>
+        <button onclick="sendResponse()">답변 전송</button>
+    </div>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

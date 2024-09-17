@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnoweAsk</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>UnoweAsk에 오신 것을 환영합니다!</h1>
+        <p>질문을 하고 답변을 받으세요.</p>
+        <div id="messages"></div>
+        <textarea id="questionInput" placeholder="여기에 질문을 입력하세요..."></textarea>
+        <button onclick="sendQuestion()">질문 전송</button>
+    </div>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

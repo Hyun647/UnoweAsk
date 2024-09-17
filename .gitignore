@@ -1,0 +1,22 @@
+# Node.js 모듈
+node_modules/
+
+# 로그 파일
+*.log
+
+# 환경 변수 파일
+.env
+
+# OS나 IDE에 의해 생성된 파일들
+.DS_Store
+Thumbs.db
+.vscode/
+
+# 빌드 아티팩트
+dist/
+build/
+
+# 테스트 및 문서 관련 파일
+coverage/
+*.tgz
+*.zip
