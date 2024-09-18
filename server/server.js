@@ -47,6 +47,7 @@ pool.getConnection((err, connection) => {
 // 클라이언트 IP를 추출하는 함수
 function getClientIp(req) {
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log(`Raw IP from headers: ${ip}`); // 추가된 로그
     if (Array.isArray(ip)) {
         ip = ip[0];
     } else {
@@ -55,6 +56,7 @@ function getClientIp(req) {
     if (ip.startsWith('::ffff:')) {
         ip = ip.split('::ffff:')[1];
     }
+    console.log(`Processed IP: ${ip}`); // 추가된 로그
     return ip;
 }
 
