@@ -34,6 +34,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type']
 }));
 
+// 데이터베이스 연결 테스트
 pool.getConnection((err, connection) => {
     if (err) {
         console.error('데이터베이스 연결 오류:', err);
@@ -43,9 +44,9 @@ pool.getConnection((err, connection) => {
     connection.release();
 });
 
-// 질문 저장: 현재 서버 시간을 `question_time`으로 저장
+// 질문을 데이터베이스에 저장하는 함수
 function saveQuestion(message, questionId, ip, callback) {
-    const questionTime = getCurrentTime(); // 서버의 현재 시간
+    const questionTime = getCurrentTime(); // 현재 서버 시간
     const query = 'INSERT INTO questions (message, questionId, ip_address, question_time) VALUES (?, ?, ?, ?)';
     pool.query(query, [message, questionId, ip, questionTime], (err, results) => {
         if (err) {
@@ -56,9 +57,9 @@ function saveQuestion(message, questionId, ip, callback) {
     });
 }
 
-// 답변 저장: 현재 서버 시간을 `answer_time`으로 저장
+// 답변을 데이터베이스에 저장하는 함수
 function saveAnswer(message, questionId, callback) {
-    const answerTime = getCurrentTime(); // 서버의 현재 시간
+    const answerTime = getCurrentTime(); // 현재 서버 시간
     const query = 'UPDATE questions SET answer = ?, answer_time = ? WHERE questionId = ?';
     pool.query(query, [message, answerTime, questionId], (err, results) => {
         if (err) {
@@ -69,6 +70,7 @@ function saveAnswer(message, questionId, callback) {
     });
 }
 
+// 질문을 데이터베이스에서 삭제하는 함수
 function deleteQuestion(questionId, callback) {
     const query = 'DELETE FROM questions WHERE questionId = ?';
     pool.query(query, [questionId], (err, results) => {
@@ -76,11 +78,12 @@ function deleteQuestion(questionId, callback) {
             console.error('질문 삭제 오류:', err);
             return callback(err);
         }
-        console.log(`[INFO] [${getCurrentTime()}] Question deleted: questionId=${questionId}`);
+        console.log(`[INFO] [${getCurrentTime()}] 질문이 삭제되었습니다: ${questionId}`);
         callback(null, results);
     });
 }
 
+// 데이터베이스에서 모든 질문을 가져오는 함수
 function getQuestions(callback) {
     const query = 'SELECT * FROM questions';
     pool.query(query, (err, results) => {
@@ -94,8 +97,10 @@ function getQuestions(callback) {
 
 app.use(express.static('public'));
 
+// WebSocket 연결 설정
 wss.on('connection', (ws, req) => {
-    let ip = req.connection.remoteAddress;
+    // 클라이언트의 실제 IP 주소를 가져옵니다.
+    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     if (ip.startsWith('::ffff:')) {
         ip = ip.split('::ffff:')[1];
@@ -121,12 +126,12 @@ wss.on('connection', (ws, req) => {
                 if (data.type === 'question') {
                     saveQuestion(data.message, data.questionId, ip, (err, results) => {
                         if (err) return;
-                        console.log(`[SUCCESS] [${getCurrentTime()}] Question saved | message: ${data.message}, questionId: ${data.questionId}, IP: ${ip}, question_time: ${getCurrentTime()}`);
+                        console.log(`[SUCCESS] [${getCurrentTime()}] 질문 저장 성공 | message: ${data.message}, questionId: ${data.questionId}, IP: ${ip}, question_time: ${getCurrentTime()}`);
                     });
                 } else if (data.type === 'answer') {
                     saveAnswer(data.message, data.questionId, (err, results) => {
                         if (err) return;
-                        console.log(`[SUCCESS] [${getCurrentTime()}] Answer saved | message: ${data.message}, questionId: ${data.questionId}, answer_time: ${getCurrentTime()}`);
+                        console.log(`[SUCCESS] [${getCurrentTime()}] 답변 저장 성공 | message: ${data.message}, questionId: ${data.questionId}, answer_time: ${getCurrentTime()}`);
                     });
                 } else if (data.type === 'deleteQuestion') {
                     deleteQuestion(data.questionId, (err, results) => {
@@ -166,9 +171,10 @@ wss.on('connection', (ws, req) => {
     });
 });
 
+// 서버 시작 시 데이터베이스에서 질문을 로딩
 getQuestions((err, results) => {
     if (err) return;
-    console.log(`[INFO] [${getCurrentTime()}] 초기 질문 로딩:`, results);
+    console.log('[INFO] [${getCurrentTime()}] 초기 질문 로딩:', results);
 });
 
 app.get('/questions', (req, res) => {
@@ -198,5 +204,5 @@ app.delete('/questions/:id', (req, res) => {
 
 const PORT = 3347;
 server.listen(PORT, () => {
-    console.log(`서버가 포트 ${PORT}에서 시작되었습니다.`);
+    console.log(`[INFO] [${getCurrentTime()}] 서버가 포트 ${PORT}에서 시작되었습니다.`);
 });
