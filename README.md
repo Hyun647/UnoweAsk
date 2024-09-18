@@ -21,7 +21,7 @@
 
 3. **서버 실행하기**
    ```bash
-   npm start
+   node server.js
    ```
 
    **이 프로젝트는 Docker에서 구동하길 권장합니다.**
