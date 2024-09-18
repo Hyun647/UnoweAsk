@@ -13,7 +13,10 @@
         <div id="qa-container"></div>
         <div id="response-section" style="display: none;">
             <textarea id="responseInput" placeholder="여기에 답변을 입력하세요..."></textarea>
-            <button onclick="sendResponse()">답변 전송</button>
+            <div class="bc">
+                <button onclick="sendResponse()">답변 전송</button>
+                <button id="cancel-response" onclick="cancelResponse()">취소</button>
+            </div>
         </div>
     </div>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>

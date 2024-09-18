@@ -124,3 +124,9 @@ function fetchQuestions() {
     })
     .catch(error => console.error('질문 불러오기 오류:', error));
 }
+
+function cancelResponse() {
+    document.getElementById('responseInput').value = ''; // 답변 입력창 초기화
+    document.getElementById('response-section').style.display = 'none'; // 답변 섹션 숨기기
+    selectedQuestionId = null; // 선택된 질문 ID 초기화
+}
