@@ -54,7 +54,20 @@ adminWs.onerror = (error) => {
 };
 
 function selectQuestion(questionId) {
+    // 이전에 선택된 질문 박스에서 'selected' 클래스 제거
+    const previouslySelected = document.querySelector('.qa-item.selected');
+    if (previouslySelected) {
+        previouslySelected.classList.remove('selected');
+    }
+
+    // 현재 선택된 질문 박스에 'selected' 클래스 추가
     selectedQuestionId = questionId;
+    const currentQuestion = document.getElementById(`question-${questionId}`);
+    if (currentQuestion) {
+        currentQuestion.classList.add('selected');
+    }
+
+    // 답변 섹션 표시
     document.getElementById('response-section').style.display = 'block';
 }
 
