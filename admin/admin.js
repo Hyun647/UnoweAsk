@@ -79,6 +79,13 @@ function sendResponse() {
         console.log('관리자 페이지에서 서버로 답변을 보냈습니다: ', response);
         responseInput.value = '';
         document.getElementById('response-section').style.display = 'none';
+
+        // 선택된 질문 박스에서 'selected' 클래스 제거
+        const currentQuestion = document.getElementById(`question-${selectedQuestionId}`);
+        if (currentQuestion) {
+            currentQuestion.classList.remove('selected');
+        }
+
         selectedQuestionId = null;
     } else {
         console.error('웹소켓이 열려있지 않거나 답변이 비어있거나 질문이 선택되지 않았습니다.');
@@ -141,5 +148,12 @@ function fetchQuestions() {
 function cancelResponse() {
     document.getElementById('responseInput').value = ''; // 답변 입력창 초기화
     document.getElementById('response-section').style.display = 'none'; // 답변 섹션 숨기기
+
+    // 선택된 질문 박스에서 'selected' 클래스 제거
+    const currentQuestion = document.getElementById(`question-${selectedQuestionId}`);
+    if (currentQuestion) {
+        currentQuestion.classList.remove('selected');
+    }
+
     selectedQuestionId = null; // 선택된 질문 ID 초기화
 }
