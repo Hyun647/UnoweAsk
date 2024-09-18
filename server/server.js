@@ -99,8 +99,13 @@ app.use(express.static('public'));
 
 // WebSocket 연결 설정
 wss.on('connection', (ws, req) => {
-    // 클라이언트의 실제 IP 주소를 가져옵니다.
     let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    if (Array.isArray(ip)) {
+        ip = ip[0];
+    } else {
+        ip = ip.split(',')[0].trim();
+    }
 
     if (ip.startsWith('::ffff:')) {
         ip = ip.split('::ffff:')[1];
@@ -115,7 +120,7 @@ wss.on('connection', (ws, req) => {
             if (data.type === 'identify') {
                 console.log(`[INFO] [${getCurrentTime()}] ${data.message}이 접속하였습니다. IP: ${ip}`);
             } else {
-                let logMessage = `[INFO] [${getCurrentTime()}] Received message | type: ${data.type}, IP: ${ip}`;
+                let logMessage = `[INFO] [${getCurrentTime()}] 받은 메시지: ${data.message} | type: ${data.type}, IP: ${ip}`;
 
                 if (data.questionId) {
                     logMessage += `, questionId: ${data.questionId}`;
@@ -126,16 +131,17 @@ wss.on('connection', (ws, req) => {
                 if (data.type === 'question') {
                     saveQuestion(data.message, data.questionId, ip, (err, results) => {
                         if (err) return;
-                        console.log(`[SUCCESS] [${getCurrentTime()}] 질문 저장 성공 | message: ${data.message}, questionId: ${data.questionId}, IP: ${ip}, question_time: ${getCurrentTime()}`);
+                        console.log(`[SUCCESS] [${getCurrentTime()}] 질문 저장 성공 | message: ${data.message} | questionId: ${data.questionId} | IP: ${ip} | question_time: ${getCurrentTime()}`);
                     });
                 } else if (data.type === 'answer') {
                     saveAnswer(data.message, data.questionId, (err, results) => {
                         if (err) return;
-                        console.log(`[SUCCESS] [${getCurrentTime()}] 답변 저장 성공 | message: ${data.message}, questionId: ${data.questionId}, answer_time: ${getCurrentTime()}`);
+                        console.log(`[SUCCESS] [${getCurrentTime()}] 답변 저장 성공 | message: ${data.message} | questionId: ${data.questionId} | answer_time: ${getCurrentTime()}`);
                     });
                 } else if (data.type === 'deleteQuestion') {
                     deleteQuestion(data.questionId, (err, results) => {
                         if (err) return;
+                        console.log(`[SUCCESS] [${getCurrentTime()}] 질문 삭제 성공 | questionId: ${data.questionId}`);
                         wss.clients.forEach(client => {
                             if (client.readyState === WebSocket.OPEN) {
                                 client.send(JSON.stringify({ type: 'questionDeleted', questionId: data.questionId }));
