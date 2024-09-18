@@ -110,7 +110,7 @@ wss.on('connection', (ws, req) => {
             if (data.type === 'identify') {
                 console.log(`${data.message}이 접속하였습니다. IP: ${ip}`);
             } else {
-                let logMessage = `받은 메시지: ${data.message} | type: ${data.type}, IP: ${ip}`;
+                let logMessage = `[${getCurrentTime()}] 받은 메시지: ${data.message} | type: ${data.type}, IP: ${ip}`;
 
                 if (data.questionId) {
                     logMessage += `, questionId: ${data.questionId}`;
@@ -121,17 +121,17 @@ wss.on('connection', (ws, req) => {
                 if (data.type === 'question') {
                     saveQuestion(data.message, data.questionId, ip, (err, results) => {
                         if (err) return;
-                        console.log('질문 저장 성공:', results);
+                        console.log(`[${getCurrentTime()}] 질문 저장 성공: message=${data.message} | questionId=${data.questionId} | ip_address=${ip} | question_time=${getCurrentTime()}`);
                     });
                 } else if (data.type === 'answer') {
                     saveAnswer(data.message, data.questionId, (err, results) => {
                         if (err) return;
-                        console.log('답변 저장 성공:', results);
+                        console.log(`[${getCurrentTime()}] 답변 저장 성공: message=${data.message} | questionId=${data.questionId} | answer_time=${getCurrentTime()}`);
                     });
                 } else if (data.type === 'deleteQuestion') {
                     deleteQuestion(data.questionId, (err, results) => {
                         if (err) return;
-                        console.log('질문 삭제 성공:', results);
+                        console.log(`[${getCurrentTime()}] 질문 삭제 성공: questionId=${data.questionId}`);
                         wss.clients.forEach(client => {
                             if (client.readyState === WebSocket.OPEN) {
                                 client.send(JSON.stringify({ type: 'questionDeleted', questionId: data.questionId }));
@@ -154,22 +154,22 @@ wss.on('connection', (ws, req) => {
                 }
             }
         } catch (error) {
-            console.error(`메시지 처리 중 오류 발생: ${error.message} (IP: ${ip})`);
+            console.error(`[${getCurrentTime()}] 메시지 처리 중 오류 발생: ${error.message} (IP: ${ip})`);
         }
     });
 
     ws.on('close', () => {
-        console.log(`클라이언트 ${ip}와의 연결이 종료되었습니다.`);
+        console.log(`[${getCurrentTime()}] 클라이언트 ${ip}와의 연결이 종료되었습니다.`);
     });
 
     ws.on('error', (error) => {
-        console.error(`웹소켓 오류 발생: ${error.message} (IP: ${ip})`);
+        console.error(`[${getCurrentTime()}] 웹소켓 오류 발생: ${error.message} (IP: ${ip})`);
     });
 });
 
 getQuestions((err, results) => {
     if (err) return;
-    console.log('초기 질문 로딩:', results);
+    console.log(`[${getCurrentTime()}] 초기 질문 로딩:`, results);
 });
 
 app.get('/questions', (req, res) => {
