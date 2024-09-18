@@ -27,28 +27,33 @@ body {
 
 #qa-container {
     display: flex;
-    flex-direction: column; /* 세로 방향으로 나열 */
-    gap: 16px; /* 요소 간 간격 */
+    flex-direction: column;
+    gap: 16px;
     overflow-y: auto; /* 세로 스크롤 활성화 */
     flex: 1; /* 남은 공간을 차지하도록 설정 */
-    margin-bottom: 20px; /* 질문과 답변 간의 여백 */
-    padding: 10px; /* 패딩 추가 */
+    margin-bottom: 20px;
+    padding: 10px;
 }
 
 .qa-item {
-    position: relative; /* 삭제 버튼이 위치할 수 있도록 상대적 위치 설정 */
-    flex: 1 1 auto; /* 자동 크기 조정 */
-    padding: 12px; /* 패딩 추가 */
+    position: relative;
+    padding: 12px;
     border: 1px solid #ced4da;
-    border-radius: 8px; /* 부드러운 둥근 모서리 */
-    background: #f1f3f5; /* 부드러운 배경 색상 */
-    box-sizing: border-box; /* 패딩과 테두리가 요소의 총 너비에 포함되도록 */
-    transition: background-color 0.3s, transform 0.3s; /* 부드러운 전환 효과 */
+    border-radius: 8px;
+    background: #f1f3f5;
+    box-sizing: border-box;
+    transition: background-color 0.3s, transform 0.3s;
+    flex-grow: 1; /* 자식 요소가 크기에 맞게 늘어나도록 설정 */
+}
+
+.question, .answer {
+    word-wrap: break-word; /* 긴 단어가 자동으로 줄 바꿈 */
+    overflow-wrap: break-word; /* 긴 단어가 자동으로 줄 바꿈 */
 }
 
 .qa-item:hover {
     background-color: #e9ecef; /* 호버 시 배경 색상 */
-    transform: translateY(-2px); /* 호버 시 약간의 이동 효과 */
+    transform: translateY(-4px); /* 호버 시 약간의 이동 효과 */
 }
 
 .question {
@@ -109,21 +114,3 @@ button:hover {
     background-color: #c82333; /* 호버 시 색상 변화 */
 }
 
-/* 모바일 화면에서 한 줄로 배치 */
-@media (max-width: 768px) {
-    .container {
-        height: 100vh; /* 모바일 화면에서 전체 높이 사용 */
-    }
-
-    #qa-container {
-        max-height: none; /* 모바일에서는 스크롤 높이 제한 제거 */
-    }
-
-    .qa-item {
-        flex: 1 1 100%; /* 한 줄로 표시 */
-    }
-}
-
-.bc {
-    text-align: right;
-}

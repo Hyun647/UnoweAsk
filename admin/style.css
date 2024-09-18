@@ -27,28 +27,33 @@ body {
 
 #qa-container {
     display: flex;
-    flex-direction: column; /* 세로 방향으로 나열 */
-    gap: 16px; /* 요소 간 간격 */
+    flex-direction: column;
+    gap: 16px;
     overflow-y: auto; /* 세로 스크롤 활성화 */
     flex: 1; /* 남은 공간을 차지하도록 설정 */
-    margin-bottom: 20px; /* 질문과 답변 간의 여백 */
-    padding: 10px; /* 패딩 추가 */
+    margin-bottom: 20px;
+    padding: 10px;
 }
 
 .qa-item {
-    position: relative; /* 삭제 버튼이 위치할 수 있도록 상대적 위치 설정 */
-    flex: 1 1 auto; /* 자동 크기 조정 */
+    position: relative; /* 삭제 버튼을 위치시킬 수 있도록 설정 */
     padding: 12px; /* 패딩 추가 */
     border: 1px solid #495057; /* 어두운 테두리 색상 */
-    border-radius: 8px; /* 부드러운 둥근 모서리 */
+    border-radius: 8px; /* 둥근 모서리 */
     background: #495057; /* 어두운 배경 색상 */
     box-sizing: border-box; /* 패딩과 테두리가 요소의 총 너비에 포함되도록 */
     transition: background-color 0.3s, transform 0.3s; /* 부드러운 전환 효과 */
+    flex-grow: 1; /* 자식 요소가 크기에 맞게 늘어나도록 설정 */
 }
 
 .qa-item:hover {
     background-color: #6c757d; /* 호버 시 배경 색상 */
-    transform: translateY(-2px); /* 호버 시 약간의 이동 효과 */
+    transform: translateY(-4px); /* 호버 시 약간의 이동 효과 */
+}
+
+.question, .answer {
+    word-wrap: break-word; /* 긴 단어가 자동으로 줄 바꿈 */
+    overflow-wrap: break-word; /* 긴 단어가 자동으로 줄 바꿈 */
 }
 
 .question {
