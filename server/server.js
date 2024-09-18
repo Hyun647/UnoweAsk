@@ -3,6 +3,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const mysql = require('mysql2');
 const cors = require('cors');
+const PORT = process.env.PORT || 3347; 
 
 // 현재 시간을 "YYYY-MM-DD HH:mm:ss" 형식으로 반환하는 함수
 function getCurrentTime() {
@@ -214,7 +215,6 @@ app.delete('/questions/:id', (req, res) => {
     });
 });
 
-const PORT = 3347;
 server.listen(PORT, () => {
     console.log(`[INFO] [${getCurrentTime()}] 서버가 포트 ${PORT}에서 시작되었습니다.`);
 });
