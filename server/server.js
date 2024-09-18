@@ -22,6 +22,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type']
 }));
 
+// 데이터베이스 연결 확인
 pool.getConnection((err, connection) => {
     if (err) {
         console.error('데이터베이스 연결 오류:', err);
@@ -31,8 +32,9 @@ pool.getConnection((err, connection) => {
     connection.release();
 });
 
+// 질문 저장
 function saveQuestion(message, questionId, ip, callback) {
-    const query = 'INSERT INTO questions (message, questionId, ip_address) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO questions (message, questionId, ip_address, created_at) VALUES (?, ?, ?, NOW())';
     pool.query(query, [message, questionId, ip], (err, results) => {
         if (err) {
             console.error('질문 저장 오류:', err);
@@ -42,6 +44,7 @@ function saveQuestion(message, questionId, ip, callback) {
     });
 }
 
+// 답변 저장
 function saveAnswer(message, questionId, callback) {
     const query = 'UPDATE questions SET answer = ? WHERE questionId = ?';
     pool.query(query, [message, questionId], (err, results) => {
@@ -53,6 +56,7 @@ function saveAnswer(message, questionId, callback) {
     });
 }
 
+// 질문 삭제
 function deleteQuestion(questionId, callback) {
     const query = 'DELETE FROM questions WHERE questionId = ?';
     pool.query(query, [questionId], (err, results) => {
@@ -65,6 +69,7 @@ function deleteQuestion(questionId, callback) {
     });
 }
 
+// 질문 목록 가져오기
 function getQuestions(callback) {
     const query = 'SELECT * FROM questions';
     pool.query(query, (err, results) => {
@@ -76,8 +81,10 @@ function getQuestions(callback) {
     });
 }
 
+// 정적 파일 서비스
 app.use(express.static('public'));
 
+// 웹소켓 연결
 wss.on('connection', (ws, req) => {
     let ip = req.connection.remoteAddress;
 
@@ -124,6 +131,7 @@ wss.on('connection', (ws, req) => {
                     });
                 }
 
+                // 다른 클라이언트로 메시지 전송
                 if (data.type !== 'identify') {
                     wss.clients.forEach(client => {
                         if (client.readyState === WebSocket.OPEN) {
@@ -151,11 +159,13 @@ wss.on('connection', (ws, req) => {
     });
 });
 
+// 초기 질문 로딩
 getQuestions((err, results) => {
     if (err) return;
     console.log('초기 질문 로딩:', results);
 });
 
+// 질문 목록을 반환하는 REST API 엔드포인트
 app.get('/questions', (req, res) => {
     getQuestions((err, results) => {
         if (err) {
@@ -165,6 +175,7 @@ app.get('/questions', (req, res) => {
     });
 });
 
+// 질문 삭제 REST API 엔드포인트
 app.delete('/questions/:id', (req, res) => {
     const questionId = req.params.id;
     deleteQuestion(questionId, (err, result) => {
@@ -181,6 +192,7 @@ app.delete('/questions/:id', (req, res) => {
     });
 });
 
+// 서버 시작
 const PORT = 3347;
 server.listen(PORT, () => {
     console.log(`서버가 포트 ${PORT}에서 시작되었습니다.`);
