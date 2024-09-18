@@ -44,6 +44,20 @@ pool.getConnection((err, connection) => {
     connection.release();
 });
 
+// 클라이언트 IP를 추출하는 함수
+function getClientIp(req) {
+    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    if (Array.isArray(ip)) {
+        ip = ip[0];
+    } else {
+        ip = ip.split(',')[0].trim();
+    }
+    if (ip.startsWith('::ffff:')) {
+        ip = ip.split('::ffff:')[1];
+    }
+    return ip;
+}
+
 // 질문을 데이터베이스에 저장하는 함수
 function saveQuestion(message, questionId, ip, callback) {
     const questionTime = getCurrentTime(); // 현재 서버 시간
@@ -99,17 +113,7 @@ app.use(express.static('public'));
 
 // WebSocket 연결 설정
 wss.on('connection', (ws, req) => {
-    let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-    if (Array.isArray(ip)) {
-        ip = ip[0];
-    } else {
-        ip = ip.split(',')[0].trim();
-    }
-
-    if (ip.startsWith('::ffff:')) {
-        ip = ip.split('::ffff:')[1];
-    }
+    const ip = getClientIp(req);
 
     console.log(`[INFO] [${getCurrentTime()}] 클라이언트 ${ip}가 연결되었습니다.`);
 
@@ -180,7 +184,7 @@ wss.on('connection', (ws, req) => {
 // 서버 시작 시 데이터베이스에서 질문을 로딩
 getQuestions((err, results) => {
     if (err) return;
-    console.log('[INFO] [${getCurrentTime()}] 초기 질문 로딩:', results);
+    console.log(`[INFO] [${getCurrentTime()}] 초기 질문 로딩:`, results);
 });
 
 app.get('/questions', (req, res) => {
