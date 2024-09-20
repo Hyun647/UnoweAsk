@@ -1,73 +1,83 @@
-const adminWs = new WebSocket('ws://110.15.29.199:9727');
+const adminWsUrl = 'ws://110.15.29.199:9727';
+let adminWs = new WebSocket(adminWsUrl);
+let reconnectTimer; // 재연결 타이머 변수
 
 let selectedQuestionId = null;
 
-adminWs.onopen = () => {
-    console.log('관리자 웹소켓 서버와 연결되었습니다.');
-    adminWs.send(JSON.stringify({ type: 'identify', message: 'admin' }));
+function connectWebSocket() {
+    adminWs = new WebSocket(adminWsUrl);
 
-    // 페이지 로드 시 기존 질문 가져오기
-    fetchQuestions();
-};
+    adminWs.onopen = () => {
+        console.log('관리자 웹소켓 서버와 연결되었습니다.');
+        adminWs.send(JSON.stringify({ type: 'identify', message: 'admin' }));
 
-adminWs.onmessage = (event) => {
-    try {
-        const message = JSON.parse(event.data);
-        const qaContainer = document.getElementById('qa-container');
-        
-        if (message.type === 'question') {
-            const questionId = message.questionId; 
-            qaContainer.innerHTML += `
-                <div class="qa-item" id="question-${questionId}" onclick="selectQuestion(${questionId})">
-                    <button class="delete-btn" onclick="deleteQuestion(event, ${questionId})">삭제</button>
-                    <div class="question">
-                        <strong>질문:</strong> ${message.message}
-                    </div>
-                    <div class="answer">
-                        답변 대기중
-                    </div>
-                </div>`;
-        } else if (message.type === 'answer') {
-            const lastQaItem = qaContainer.querySelector(`#question-${message.questionId}`);
-            if (lastQaItem) {
-                lastQaItem.querySelector('.answer').innerHTML = `
-                    <strong>답변:</strong> ${message.message}`;
+        // 페이지 로드 시 기존 질문 가져오기
+        fetchQuestions();
+
+        // 재연결 시도가 성공하면 타이머 해제
+        clearTimeout(reconnectTimer);
+    };
+
+    adminWs.onmessage = (event) => {
+        try {
+            const message = JSON.parse(event.data);
+            const qaContainer = document.getElementById('qa-container');
+
+            if (message.type === 'question') {
+                const questionId = message.questionId;
+                qaContainer.innerHTML += `
+                    <div class="qa-item" id="question-${questionId}" onclick="selectQuestion(${questionId})">
+                        <button class="delete-btn" onclick="deleteQuestion(event, ${questionId})">삭제</button>
+                        <div class="question">
+                            <strong>질문:</strong> ${message.message}
+                        </div>
+                        <div class="answer">
+                            답변 대기중
+                        </div>
+                    </div>`;
+            } else if (message.type === 'answer') {
+                const lastQaItem = qaContainer.querySelector(`#question-${message.questionId}`);
+                if (lastQaItem) {
+                    lastQaItem.querySelector('.answer').innerHTML = `
+                        <strong>답변:</strong> ${message.message}`;
+                }
+            } else if (message.type === 'questionDeleted') {
+                const questionId = message.questionId;
+                const questionElement = document.getElementById(`question-${questionId}`);
+                if (questionElement) {
+                    questionElement.remove();
+                }
             }
-        } else if (message.type === 'questionDeleted') {
-            const questionId = message.questionId;
-            const questionElement = document.getElementById(`question-${questionId}`);
-            if (questionElement) {
-                questionElement.remove();
-            }
+        } catch (error) {
+            console.error('메시지 파싱 오류: ', error.message);
         }
-    } catch (error) {
-        console.error('메시지 파싱 오류: ', error.message);
-    }
-};
+    };
 
-adminWs.onclose = () => {
-    console.log('관리자 웹소켓 서버와의 연결이 종료되었습니다.');
-};
+    adminWs.onclose = () => {
+        console.log('관리자 웹소켓 서버와의 연결이 종료되었습니다. 3초 후 재연결을 시도합니다.');
+        reconnectTimer = setTimeout(connectWebSocket, 3000); // 3초 후 재연결 시도
+    };
 
-adminWs.onerror = (error) => {
-    console.error('관리자 웹소켓 오류 발생: ', error);
-};
+    adminWs.onerror = (error) => {
+        console.error('관리자 웹소켓 오류 발생: ', error);
+        adminWs.close(); // 오류 발생 시 연결을 닫고 재연결 시도
+    };
+}
+
+connectWebSocket(); // 웹소켓 초기 연결
 
 function selectQuestion(questionId) {
-    // 이전에 선택된 질문 박스에서 'selected' 클래스 제거
     const previouslySelected = document.querySelector('.qa-item.selected');
     if (previouslySelected) {
         previouslySelected.classList.remove('selected');
     }
 
-    // 현재 선택된 질문 박스에 'selected' 클래스 추가
     selectedQuestionId = questionId;
     const currentQuestion = document.getElementById(`question-${questionId}`);
     if (currentQuestion) {
         currentQuestion.classList.add('selected');
     }
 
-    // 답변 섹션 표시
     document.getElementById('response-section').style.display = 'block';
 }
 
@@ -80,7 +90,6 @@ function sendResponse() {
         responseInput.value = '';
         document.getElementById('response-section').style.display = 'none';
 
-        // 선택된 질문 박스에서 'selected' 클래스 제거
         const currentQuestion = document.getElementById(`question-${selectedQuestionId}`);
         if (currentQuestion) {
             currentQuestion.classList.remove('selected');
@@ -149,7 +158,6 @@ function cancelResponse() {
     document.getElementById('responseInput').value = ''; // 답변 입력창 초기화
     document.getElementById('response-section').style.display = 'none'; // 답변 섹션 숨기기
 
-    // 선택된 질문 박스에서 'selected' 클래스 제거
     const currentQuestion = document.getElementById(`question-${selectedQuestionId}`);
     if (currentQuestion) {
         currentQuestion.classList.remove('selected');

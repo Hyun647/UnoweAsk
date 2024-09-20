@@ -73,7 +73,7 @@ const attemptReconnect = () => {
         reconnectInterval = setInterval(() => {
             console.log('서버 재연결 시도 중...');
             clientWsConnect();
-        }, 5000); // 5초마다 재연결 시도
+        }, 3000); // 3초마다 재연결 시도
     }
 };
 
